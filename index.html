@@ -7,6 +7,10 @@
 	body {
 	  background: #333 none;
 	}
+	svg {
+		background: #4bb1e1 none;
+	}
+	
 
 	.stroke {
 	  fill: none;
@@ -34,6 +38,19 @@
 	  stroke: #0ff;
 	  stroke-width: .5px;
 	}
+	
+
+	.q1-9 { fill: rgba(222,119,174, 0.6); }
+	.q2-9 { fill: rgba(119,174,222, 0.6); }
+	.q3-9 { fill: rgba(222,119,174, 0.6); }
+	.q4-9 { fill: rgba(222,119,174, 0.6); }
+	.q5-9 { fill: rgba(222,119,174, 0.6); }
+	.q6-9 { fill: rgba(222,119,174, 0.6); }
+	.q7-9 { fill: rgba(222,119,174, 0.6); }
+	.q8-9 { fill: rgba(222,119,174, 0.6); }
+	.q9-9 { fill: rgba(222,119,174, 0.6); }
+	
+	
 
 	</style>
 	<script src="d3.js"></script>
@@ -46,11 +63,11 @@
 
 
 //définition du canvas
-var width = 960,
+var width = 1500,
     height = 960;
 
 // définition du type de projection
-var projection = d3.geo.azimuthalEqualArea()
+var projection = d3.geo.mercator()
     .clipAngle(180 - 1e-3)
     .scale(237)
     .translate([width / 2, height / 2])
@@ -127,6 +144,7 @@ d3.csv("index.csv", function(data){
 		    links.push(edge(d[2], d[0]));
 		  });
 		
+
 		
 	  feature = svg.selectAll("path")
 	      .data(collection.features)
@@ -163,15 +181,25 @@ d3.csv("index.csv", function(data){
 						   })
 			.style("stroke", "rgba(0,0,0,0.3)")
 			.attr('id',function(d){ return d.properties.name; });
+		    
+		    var link = svg.selectAll("line")
+		    		      .data(links)
+		    		    .enter().append("svg:line")
+		    		      .attr("x1", function(d) { return d.source.x; })
+		    		      .attr("y1", function(d) { return d.source.y; })
+		    		      .attr("x2", function(d) { return d.target.x; })
+		    		      .attr("y2", function(d) { return d.target.y; })
+		    		.style("stroke", "rgba(0,0,0,0.4)");
+		// 
+		// var schema = d3.geom.voronoi.triangles(nodes);
+		// 
+		// var triangles = svg.selectAll("path")
+		// 			.data(schema)
+		// 			.enter().append("svg:path")
+		// 			.attr("class", function(d, i) { return i ? "q" + (i % 9) + "-9" : null; })
+		// 			.attr("d", path);
+
 		
-		      var link = svg.selectAll("line")
-		      .data(links)
-		    .enter().append("svg:line")
-		      .attr("x1", function(d) { return d.source.x; })
-		      .attr("y1", function(d) { return d.source.y; })
-		      .attr("x2", function(d) { return d.target.x; })
-		      .attr("y2", function(d) { return d.target.y; })
-		.style("stroke", "rgba(0,0,0,0.4)");
 
                                                                             
 	});	
