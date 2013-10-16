@@ -88,21 +88,46 @@ svg.append("path")
     .attr("class", "graticule")
     .attr("d", path);
 
-// tableau de couleurs en fonction de l'index
-var couleurs = []
+
+function edge(a, b) {
+  var dx = a[0] - b[0], dy = a[1] - b[1];
+  return {
+    source: a,
+    target: b,
+    distance: Math.sqrt(dx * dx + dy * dy)
+  };
+}
 	
 	
 //prennons le temps d'analyser le csv avant de lancer "function ready()"
-	queue()
-	    .defer(d3.csv, "index.csv", function(d,i) { 
-			
-			couleurs[d.iso] = d.cat;
-			})
-		.await(ready);
-	
-function ready(error, us) {
+
+d3.csv("index.csv", function(data){
+	// tableau de couleurs en fonction de l'index
+	var couleurs = [];
+	data.forEach(function(d){
+		couleurs[d.iso] = d.cat;
+	});
 	
 	d3.json("world-countries.json", function(collection) {
+		var nodes = [],
+		    links = [];
+		
+		collection.features.forEach(function(d, i) {
+		    if (d.id == "02" || d.id == "15" || d.id == "72") return; // lower 48
+		    var centroid = path.centroid(d);
+		    centroid.x = centroid[0];
+		    centroid.y = centroid[1];
+		    centroid.feature = d;
+		    nodes.push(centroid);
+		  });
+
+	  d3.geom.delaunay(nodes).forEach(function(d) {
+		    links.push(edge(d[0], d[1]));
+		    links.push(edge(d[1], d[2]));
+		    links.push(edge(d[2], d[0]));
+		  });
+		
+		
 	  feature = svg.selectAll("path")
 	      .data(collection.features)
 	      .enter().append("svg:path")
@@ -139,13 +164,20 @@ function ready(error, us) {
 			.style("stroke", "rgba(0,0,0,0.3)")
 			.attr('id',function(d){ return d.properties.name; });
 		
-		
+		      var link = svg.selectAll("line")
+		      .data(links)
+		    .enter().append("svg:line")
+		      .attr("x1", function(d) { return d.source.x; })
+		      .attr("y1", function(d) { return d.source.y; })
+		      .attr("x2", function(d) { return d.target.x; })
+		      .attr("y2", function(d) { return d.target.y; })
+		.style("stroke", "rgba(0,0,0,0.4)");
 
                                                                             
-	});
+	});	
 	
-	
-}
+});
+
 
 d3.select(self.frameElement).style("height", height + "px");
 
