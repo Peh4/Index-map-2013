@@ -40,15 +40,15 @@
 	}
 	
 
-	.q1-9 { fill: rgba(222,119,174, 0.6); }
-	.q2-9 { fill: rgba(119,174,222, 0.6); }
-	.q3-9 { fill: rgba(222,119,174, 0.6); }
-	.q4-9 { fill: rgba(222,119,174, 0.6); }
-	.q5-9 { fill: rgba(222,119,174, 0.6); }
-	.q6-9 { fill: rgba(222,119,174, 0.6); }
-	.q7-9 { fill: rgba(222,119,174, 0.6); }
-	.q8-9 { fill: rgba(222,119,174, 0.6); }
-	.q9-9 { fill: rgba(222,119,174, 0.6); }
+	.q1-9 { fill: rgba(222,119,74, 0.1); }
+	.q2-9 { fill: rgba(119,14,222, 0.1); }
+	.q3-9 { fill: rgba(22,1,17, 0.1); }
+	.q4-9 { fill: rgba(2,119,174, 0.1); }
+	.q5-9 { fill: rgba(22,19,14, 0.1); }
+	.q6-9 { fill: rgba(222,119,1, 0.1); }
+	.q7-9 { fill: rgba(22,19,14, 0.1); }
+	.q8-9 { fill: rgba(22,19,74, 0.1); }
+	.q9-9 { fill: rgba(222,9,17, 0.1); }
 	
 	
 
@@ -132,8 +132,8 @@ d3.csv("index.csv", function(data){
 		collection.features.forEach(function(d, i) {
 		    if (d.id == "02" || d.id == "15" || d.id == "72") return; // lower 48
 		    var centroid = path.centroid(d);
-		    centroid.x = centroid[0];
-		    centroid.y = centroid[1];
+//		    centroid.x = centroid[0];
+//		    centroid.y = centroid[1];
 		    centroid.feature = d;
 		    nodes.push(centroid);
 		  });
@@ -145,8 +145,8 @@ d3.csv("index.csv", function(data){
 		  });
 		
 
-		
-	  feature = svg.selectAll("path")
+	var groupFeatures = svg.append("svg:g"); 	
+	  feature = groupFeatures.selectAll("path")
 	      .data(collection.features)
 	      .enter().append("svg:path")
 	      .attr("d", path)
@@ -181,30 +181,37 @@ d3.csv("index.csv", function(data){
 						   })
 			.style("stroke", "rgba(0,0,0,0.3)")
 			.attr('id',function(d){ return d.properties.name; });
+		 
+		 
+		 var groupLinks = svg.append("svg:g");
 		    
-		    var link = svg.selectAll("line")
+		 var link = groupLinks.selectAll("line")
 		    		      .data(links)
 		    		    .enter().append("svg:line")
-		    		      .attr("x1", function(d) { return d.source.x; })
-		    		      .attr("y1", function(d) { return d.source.y; })
-		    		      .attr("x2", function(d) { return d.target.x; })
-		    		      .attr("y2", function(d) { return d.target.y; })
+		    		      .attr("x1", function(d) { return d.source[0]; })
+		    		      .attr("y1", function(d) { return d.source[1]; })
+		    		      .attr("x2", function(d) { return d.target[0]; })
+		    		      .attr("y2", function(d) { return d.target[1]; })
 		    		.style("stroke", "rgba(0,0,0,0.4)");
-		// 
-		// var schema = d3.geom.voronoi.triangles(nodes);
-		// 
-		// var triangles = svg.selectAll("path")
-		// 			.data(schema)
-		// 			.enter().append("svg:path")
-		// 			.attr("class", function(d, i) { return i ? "q" + (i % 9) + "-9" : null; })
-		// 			.attr("d", path);
-
-		
-
-                                                                            
-	});	
+		 
+		 var schema = d3.geom.delaunay(nodes);
+		 
+		 var test = function(d) { return "M" + d.join("L") + "Z"; }
+		 
+		 //var vertice = schema.map(function(d) { return "M" + d.join("L") + "Z"; })
+		 
+		 var groupTriangles = svg.append("svg:g"); 
+		 
+		 var triangles = groupTriangles.selectAll("path")
+		 			.data(schema)
+		 			.enter().append("svg:path")
+		 			.attr("d", test)
+		 			.style("fill", function(d, i) { 
+		 				console.log("M" + d.join("L") + "Z"); 
+		 				return "rgba(" + (Math.floor((10 * i)) % 205) + "," + (Math.floor((i/30)) % 205) + "," + (Math.floor((i*6+5)) % 205) + ", 0.6)"; });
+					});	
 	
-});
+		});
 
 
 d3.select(self.frameElement).style("height", height + "px");
